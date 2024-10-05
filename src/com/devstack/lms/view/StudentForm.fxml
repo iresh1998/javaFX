@@ -1,14 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
-
+<AnchorPane fx:id="context" prefHeight="506.0" prefWidth="742.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.devstack.lms.controller.StudentFormController">
+   <children>
+      <Label layoutX="20.0" layoutY="33.0" text="Student Form">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Separator layoutX="14.0" layoutY="71.0" prefHeight="1.0" prefWidth="697.0" />
+      <Button layoutX="438.0" layoutY="34.0" mnemonicParsing="false" onAction="#btnBackToHomeOnAction" text="Back to Home" />
+      <TextField fx:id="txtname" layoutX="20.0" layoutY="89.0" promptText="Student Name">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtaddress" layoutX="221.0" layoutY="89.0" promptText="Address">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtage" layoutX="425.0" layoutY="89.0" prefHeight="31.0" prefWidth="85.0" promptText="age">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtemail" layoutX="529.0" layoutY="89.0" promptText="Email">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextField>
+      <Button fx:id="btnSave" layoutX="621.0" layoutY="130.0" mnemonicParsing="false" onAction="#saveStudentOnAction" text="Save Student" />
+      <TextField fx:id="txtSearch" layoutX="14.0" layoutY="175.0" prefHeight="26.0" prefWidth="698.0" promptText="Search hear" />
+      <Separator layoutX="20.0" layoutY="163.0" prefHeight="1.0" prefWidth="697.0" />
+      <Separator layoutX="13.0" layoutY="213.0" prefHeight="1.0" prefWidth="697.0" />
+      <TableView fx:id="tblStudent" layoutX="13.0" layoutY="237.0" prefHeight="259.0" prefWidth="698.0">
+        <columns>
+          <TableColumn fx:id="colName" prefWidth="128.00002765655518" text="Name" />
+          <TableColumn fx:id="colAddress" minWidth="9.5999755859375" prefWidth="119.19996643066406" text="Address" />
+            <TableColumn fx:id="colAge" prefWidth="48.800048828125" text="Age" />
+            <TableColumn fx:id="colEmail" minWidth="0.0" prefWidth="157.60003662109375" text="Email" />
+            <TableColumn fx:id="colOption" prefWidth="241.60001220703123" text="Options" />
+        </columns>
+      </TableView>
+      <Button layoutX="559.0" layoutY="34.0" mnemonicParsing="false" onAction="#btnNewStudentOnAction" text="New Student" />
+   </children>
 </AnchorPane>
