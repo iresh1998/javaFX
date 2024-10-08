@@ -2,6 +2,7 @@
   <library name="mysql-connector-j-8.0.32-javadoc">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/sql/mysql-connector-j-8.4.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/bcrypt/jbcrypt.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

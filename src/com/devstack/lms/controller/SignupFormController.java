@@ -1,6 +1,9 @@
 package com.devstack.lms.controller;
 
-import com.devstack.lms.db.DatabaseAccessCode;
+//import com.devstack.lms.db.DatabaseAccessCode;
+import com.devstack.lms.business.BoFactory;
+import com.devstack.lms.business.custom.UserBo;
+import com.devstack.lms.dto.UserDto;
 import com.devstack.lms.entity.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -20,27 +23,25 @@ public class SignupFormController {
     public TextField txtUsername;
     public TextField txtPassword;
 
+    private final UserBo userBo= BoFactory.getBo(BoFactory.BoType.USER);
     public void createNewAccountOnAction(ActionEvent actionEvent) {
-        User user = new User(
+        UserDto user = new UserDto(
                 UUID.randomUUID().toString(),
                 txtUsername.getText(),
                 txtPassword.getText()
         );
-        DatabaseAccessCode databaseAccessCode=new DatabaseAccessCode();
         try {
-            boolean isSaved =  databaseAccessCode.signup(user);
-            if(isSaved){
-
+            boolean isSaved = userBo.create(user);
+            if (isSaved) {
                 setUi("LoginForm");
-
-
-            }else {
-                new Alert(Alert.AlertType.WARNING,"Something went wrong!").show();
+            } else {
+                new Alert(Alert.AlertType.WARNING, "something went wrong, pleas try again a bit later..").show();
             }
-        }catch (IOException | ClassNotFoundException | SQLException e){
+        } catch (IOException | ClassNotFoundException | SQLException e) {
             e.printStackTrace();
-            new Alert(Alert.AlertType.ERROR,e.getMessage()).show();
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
         }
+
 
     }
 

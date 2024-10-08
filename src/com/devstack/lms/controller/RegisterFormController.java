@@ -1,6 +1,13 @@
 package com.devstack.lms.controller;
 
-import com.devstack.lms.db.DatabaseAccessCode;
+import com.devstack.lms.business.BoFactory;
+import com.devstack.lms.business.custom.CourseBo;
+import com.devstack.lms.business.custom.RegistrationBo;
+import com.devstack.lms.business.custom.StudentBo;
+//import com.devstack.lms.db.DatabaseAccessCode;
+import com.devstack.lms.dto.CourseDto;
+import com.devstack.lms.dto.RegistrationDto;
+import com.devstack.lms.dto.StudentDto;
 import com.devstack.lms.entity.Course;
 import com.devstack.lms.entity.Registration;
 import com.devstack.lms.entity.Student;
@@ -33,8 +40,12 @@ public class RegisterFormController {
     public TextField txtEmail;
     public ToggleGroup paymentType;
 
-    private Student selectedStudent;
-    private Course selectedCourse;
+    private StudentDto selectedStudent;
+    private CourseDto selectedCourse;
+
+    private final RegistrationBo registrationBo = BoFactory.getBo(BoFactory.BoType.REGISTRATION);
+    private final StudentBo studentBo = BoFactory.getBo(BoFactory.BoType.STUDENT);
+    private final CourseBo courseBo = BoFactory.getBo(BoFactory.BoType.COURSE);
 
     public void initialize(){
         loadAllCourses();
@@ -66,8 +77,8 @@ public class RegisterFormController {
         String studentId = splitData[0].trim();
 
         try {
-            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-            selectedStudent = databaseAccessCode.findStudent(studentId);
+
+            selectedStudent = studentBo.find(studentId);
             if(selectedStudent==null){
                 new Alert(Alert.AlertType.WARNING,"Student not found....!");
                 return;
@@ -83,15 +94,15 @@ public class RegisterFormController {
 
     private void setCourseDetails(String newValue) {
         String[] splitData = newValue.split("\\|");
-        String courseId = splitData[0].trim();
+        String courseId=splitData[0].trim();
 
         try {
-            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-            selectedCourse = databaseAccessCode.findCourse(courseId);
-            if(selectedCourse==null){
-                new Alert(Alert.AlertType.WARNING,"Course not found....!");
+            selectedCourse = courseBo.find(courseId);
+            if (selectedCourse==null){
+                new Alert(Alert.AlertType.WARNING,"Course not found...");
                 return;
             }
+
             txtCourseName.setText(selectedCourse.getCourseName());
             txtCourseFee.setText(String.valueOf(selectedCourse.getFee()));
 
@@ -107,11 +118,9 @@ public class RegisterFormController {
 
     private void loadAllStudents() {
         //        courseObList.clear();
-        try {
-            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-            studentObList = FXCollections.observableArrayList(
-                    databaseAccessCode.findAllStudents("").
-                            stream().map(e->e.getStudentId()+" | "+e.getStudentName()).collect(Collectors.toList()));
+        try{
+            studentObList = FXCollections.observableArrayList(studentBo.findAll()
+                    .stream().map(e->e.getStudentId()+" | "+e.getStudentName()).collect(Collectors.toList()));
             cmbStudent.setItems(studentObList);
 
         }catch (Exception e){
@@ -122,11 +131,9 @@ public class RegisterFormController {
 
     private void loadAllCourses() {
 //        courseObList.clear();
-        try {
-            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-            courseObList = FXCollections.observableArrayList(
-                    databaseAccessCode.findAllCourses().
-                            stream().map(e->e.getCourseId()+" | "+e.getCourseName()).collect(Collectors.toList()));
+        try{
+            courseObList = FXCollections.observableArrayList(courseBo.findAll()
+                    .stream().map(e->e.getCourseId()+" | "+e.getCourseName()).collect(Collectors.toList()));
             cmbCourse.setItems(courseObList);
 
         }catch (Exception e){
@@ -141,32 +148,31 @@ public class RegisterFormController {
     public void registerOnAction(ActionEvent actionEvent) {
 
         if(selectedCourse==null || selectedStudent==null){
-            new Alert(Alert.AlertType.WARNING,"Please return to home!").show();
+            new Alert(Alert.AlertType.WARNING,"please return to home and come back... or try after choose potential data").show();
             return;
         }
 
         try {
-            Registration registration=
-                    new Registration(UUID.randomUUID().toString(),
+            RegistrationDto registration =
+                    new RegistrationDto(
+                            UUID.randomUUID().toString(),
                             new Date(),
                             null,
-                            rBtnCash.isSelected()?PaymentType.CASH:PaymentType.CARD,
+                            rBtnCash.isSelected()? PaymentType.CASH:PaymentType.CARD,
                             selectedStudent.getStudentId(),
                             selectedCourse.getCourseId());
 
-            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-            boolean isSaved = databaseAccessCode.register(registration);
+            boolean isSaved = registrationBo.create(registration);
             if (isSaved) {
-                new Alert(Alert.AlertType.INFORMATION, "Registration has been successful...", ButtonType.CLOSE).show();
+                new Alert(Alert.AlertType.INFORMATION, "registration was successful..", ButtonType.CLOSE).show();
                 clearFields();
             } else {
-                new Alert(Alert.AlertType.WARNING, "Try again...", ButtonType.CLOSE).show();
+                new Alert(Alert.AlertType.WARNING, "Try Again..", ButtonType.CLOSE).show();
             }
-
         } catch (SQLException | ClassNotFoundException e) {
-
             new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).show();
         }
+
     }
 
     private void clearFields() {

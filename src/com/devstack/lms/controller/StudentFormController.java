@@ -1,6 +1,8 @@
 package com.devstack.lms.controller;
 
-import com.devstack.lms.db.DatabaseAccessCode;
+import com.devstack.lms.business.BoFactory;
+import com.devstack.lms.business.custom.StudentBo;
+import com.devstack.lms.dto.StudentDto;
 import com.devstack.lms.entity.Student;
 import com.devstack.lms.view.tm.StudentTM;
 import javafx.collections.FXCollections;
@@ -40,7 +42,10 @@ public class StudentFormController {
 
 
     private String searchText = "";
-    private Student selectedStudent = null;
+    private StudentDto selectedStudent = null;
+
+    private final StudentBo studentBo= BoFactory.getBo(BoFactory.BoType.STUDENT);
+
 
 
     public void initialize() {
@@ -65,17 +70,15 @@ public class StudentFormController {
         ObservableList<StudentTM> tmObservableList = FXCollections.observableArrayList();
 
         try {
+            List<StudentDto> allStudents =
+                    studentBo.search(searchText);
 
-            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-            List<Student> allStudents =
-                    databaseAccessCode.findAllStudents(searchText);
-
-            for (Student s : allStudents) {
+            for(StudentDto s:allStudents){
 
                 ButtonBar bar = new ButtonBar();
                 Button deleteButton = new Button("Delete");
                 Button updateButton = new Button("Update");
-                bar.getButtons().addAll(deleteButton, updateButton);
+                bar.getButtons().addAll(deleteButton,updateButton);
 
                 StudentTM tm = new StudentTM(
                         s.getStudentId(),
@@ -87,35 +90,29 @@ public class StudentFormController {
                 );
 
 
+
                 deleteButton.setOnAction(event -> {
 
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure do you want to delete..?",
-                            ButtonType.NO, ButtonType.YES);
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                            "are you sure whether do you want to delete this item?",
+                            ButtonType.NO,ButtonType.YES);
                     Optional<ButtonType> buttonType = alert.showAndWait();
+                    if (buttonType.get()==ButtonType.YES){
+                        try{
 
-                    if (buttonType.get() == ButtonType.YES) {
+                            boolean isDeleted = studentBo.delete(tm.getStudentId());
 
-                        try {
-
-                            DatabaseAccessCode dbAccessCode = new DatabaseAccessCode();
-                            boolean isDeleted = dbAccessCode.deleteStudent(tm.getStudentId());
-
-                            if (isDeleted) {
-
-                                new Alert(Alert.AlertType.INFORMATION, "Student has benn deleted...", ButtonType.CLOSE).show();
+                            if(isDeleted){
+                                new Alert(Alert.AlertType.INFORMATION, "Student has been deleted..", ButtonType.CLOSE).show();
                                 loadAllStudents();
-                            } else {
-
-                                new Alert(Alert.AlertType.INFORMATION, "Try Again...", ButtonType.CLOSE).show();
+                            }else{
+                                new Alert(Alert.AlertType.WARNING, "Something went wrong and try again.", ButtonType.CLOSE).show();
                             }
 
                         } catch (SQLException | ClassNotFoundException e) {
-
                             new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).show();
                         }
-
                     }
-
                 });
                 updateButton.setOnAction(event -> {
 
@@ -146,15 +143,15 @@ public class StudentFormController {
 
         if (btnSave.getText().equalsIgnoreCase("Save Student")) {
             try {
-                Student student = new Student(
+                StudentDto student = new StudentDto(
                         UUID.randomUUID().toString(),
                         txtname.getText().trim(),
                         txtaddress.getText().trim(),
                         txtemail.getText().toLowerCase().trim(), Integer.parseInt(txtage.getText())
                 );
 
-                DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-                boolean isSaved = databaseAccessCode.saveStudent(student);
+
+                boolean isSaved = studentBo.create(student);
                 if (isSaved) {
                     new Alert(Alert.AlertType.INFORMATION, "Student has been Saved...", ButtonType.CLOSE).show();
                     clearFields();
@@ -174,15 +171,15 @@ public class StudentFormController {
             if (selectedStudent != null) {
 
                 try {
-                    Student student = new Student(
+                    StudentDto student = new StudentDto(
                             selectedStudent.getStudentId(),
                             txtname.getText().trim(),
                             txtaddress.getText().trim(),
                             txtemail.getText().toLowerCase().trim(),Integer.parseInt(txtage.getText())
                     );
 
-                    DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-                    boolean isSaved = databaseAccessCode.updateStudent(student);
+
+                    boolean isSaved = studentBo.update(student);
                     if (isSaved){
                         new Alert(Alert.AlertType.INFORMATION,"Student has been Modified...", ButtonType.CLOSE).show();
                         clearFields();

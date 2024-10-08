@@ -1,6 +1,9 @@
 package com.devstack.lms.controller;
 
-import com.devstack.lms.db.DatabaseAccessCode;
+import com.devstack.lms.business.BoFactory;
+import com.devstack.lms.business.custom.CourseBo;
+//import com.devstack.lms.db.DatabaseAccessCode;
+import com.devstack.lms.dto.CourseDto;
 import com.devstack.lms.entity.Course;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -25,16 +28,18 @@ public class CourseFormController {
     public TextField txtCourseFee;
     public TextField txtCourseName;
 
+    private final CourseBo courseBo = BoFactory.getBo(BoFactory.BoType.COURSE);
+
     public void saveCourseOnAction(ActionEvent actionEvent) {
         try {
-            Course course = new Course(
+            CourseDto course = new CourseDto(
                     UUID.randomUUID().toString(),
                     txtCourseName.getText().trim(),
                     Double.parseDouble(txtCourseFee.getText().trim())
             );
 
-            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
-            boolean isSaved = databaseAccessCode.saveCourse(course);
+//            DatabaseAccessCode databaseAccessCode = new DatabaseAccessCode();
+            boolean isSaved = courseBo.create(course);
             if (isSaved) {
                 new Alert(Alert.AlertType.INFORMATION, "Course has been Saved...", ButtonType.CLOSE).show();
                 clearFields();
